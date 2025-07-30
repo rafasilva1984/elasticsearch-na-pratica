@@ -30,7 +30,7 @@ elasticsearch-na-pratica/
 ## ▶️ Como usar
 
 ```bash
-git clone https://github.com/seuusuario/elasticsearch-na-pratica.git
+git clone https://github.com/rafasilva1984/elasticsearch-na-pratica.git
 cd elasticsearch-na-pratica/01-instalacao
 docker-compose up -d
 ```
