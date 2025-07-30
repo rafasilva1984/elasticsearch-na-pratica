@@ -1,8 +1,0 @@
-# elasticsearch.yml
-cluster.name: "meu-cluster-elasticsearch"
-node.name: "nodo-1"
-network.host: 0.0.0.0
-http.port: 9200
-discovery.type: single-node
-xpack.security.enabled: false
-bootstrap.memory_lock: true
