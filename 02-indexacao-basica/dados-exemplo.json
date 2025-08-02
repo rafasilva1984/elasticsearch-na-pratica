@@ -1,0 +1,5 @@
+[
+  { "nome": "João da Silva", "email": "joao@exemplo.com", "idade": 30, "cidade": "São Paulo", "data_cadastro": "2024-01-01" },
+  { "nome": "Maria Oliveira", "email": "maria@exemplo.com", "idade": 25, "cidade": "Campinas", "data_cadastro": "2024-02-10" },
+  { "nome": "Carlos Lima", "email": "carlos@exemplo.com", "idade": 35, "cidade": "Belo Horizonte", "data_cadastro": "2024-03-15" }
+]

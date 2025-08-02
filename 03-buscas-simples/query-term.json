@@ -1,0 +1,7 @@
+{
+  "query": {
+    "term": {
+      "cidade": "SÃO PAULO"
+    }
+  }
+}

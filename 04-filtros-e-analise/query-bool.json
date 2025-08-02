@@ -1,0 +1,13 @@
+{
+  "query": {
+    "bool": {
+      "must": [
+        { "term": { "cidade": "Sao Paulo" } },
+        { "range": { "idade": { "gte": 25, "lte": 40 } } }
+      ],
+      "must_not": [
+        { "match": { "nome": "teste" } }
+      ]
+    }
+  }
+}
