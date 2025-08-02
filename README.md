@@ -1,4 +1,4 @@
-# 📘 Elasticsearch na Prática – Curso Completo com Simulação Real de Infraestrutura
+# 📘 Elasticsearch na Prática – Guia Completo com Simulação Real de Infraestrutura
 
 Este repositório é um guia prático para quem deseja aprender Elasticsearch simulando um cenário real de monitoramento de infraestrutura de TI.  
 
