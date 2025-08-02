@@ -1,20 +1,22 @@
 # 📒 Queries no Dev Tools – Elasticsearch na Prática
 
-Este guia contém todas as queries divididas por módulo para serem utilizadas no **Dev Tools do Kibana**.
+Este guia contém todas as queries utilizadas durante o curso, organizadas por módulo, com perguntas claras e comandos prontos para execução no **Dev Tools do Kibana**.
 
 ---
 
 ## 🧩 01 - Verificando o Cluster
 
+🔹 **Qual é o status do cluster Elasticsearch?**
+
 ```json
 GET /
 ```
 
-Retorna o status do Elasticsearch.
-
 ---
 
-## 📥 02 - Criação de índice `infra-hosts` com mapping
+## 📥 02 - Criação e Estrutura do Índice
+
+🔹 **Como criar o índice `infra-hosts` com campos esperados?**
 
 ```json
 PUT infra-hosts
@@ -34,9 +36,9 @@ PUT infra-hosts
 
 ---
 
-## 🔎 03 - Consultas básicas
+## 🔎 03 - Consultas Simples e Complexas
 
-### Match
+🔹 **Quais hosts oferecem serviço `api`?**
 
 ```json
 GET infra-hosts/_search
@@ -49,7 +51,7 @@ GET infra-hosts/_search
 }
 ```
 
-### Range
+🔹 **Quais hosts estão com uso de CPU maior ou igual a 80%?**
 
 ```json
 GET infra-hosts/_search
@@ -64,9 +66,27 @@ GET infra-hosts/_search
 }
 ```
 
+🔹 **Quais hosts estão com status `warning` e CPU acima de 85%?**
+
+```json
+GET infra-hosts/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        { "match": { "status": "warning" } },
+        { "range": { "cpu": { "gte": 85 } } }
+      ]
+    }
+  }
+}
+```
+
 ---
 
-## 🧠 04 - Consultas booleanas
+## 🧠 04 - Filtros e Análise
+
+🔹 **Quais hosts estão online com memória acima de 75%, excluindo bancos de dados?**
 
 ```json
 GET infra-hosts/_search
@@ -85,11 +105,21 @@ GET infra-hosts/_search
 }
 ```
 
+🔹 **Como funciona a análise de texto com `standard analyzer`?**
+
+```json
+POST /_analyze
+{
+  "analyzer": "standard",
+  "text": "srv-api-01 entrou em estado warning"
+}
+```
+
 ---
 
-## 📊 05 - Agregações para dashboards
+## 📊 05 - Agregações e Dashboards
 
-### CPU médio por serviço
+🔹 **Qual a média de uso de CPU por tipo de serviço?**
 
 ```json
 GET infra-hosts/_search
@@ -108,7 +138,7 @@ GET infra-hosts/_search
 }
 ```
 
-### Quantidade de hosts por status
+🔹 **Quantos hosts existem por status (online, offline, warning)?**
 
 ```json
 GET infra-hosts/_search
@@ -124,9 +154,23 @@ GET infra-hosts/_search
 }
 ```
 
+🔹 **Mostrar os hosts com maior uso de memória**
+
+```json
+GET infra-hosts/_search
+{
+  "size": 5,
+  "sort": [
+    { "memoria": "desc" }
+  ]
+}
+```
+
 ---
 
-## 📅 06 - Filtrar por data (julho de 2025)
+## 📅 06 - Filtro por Período (julho de 2025)
+
+🔹 **Quais eventos ocorreram entre 01 e 31 de julho de 2025?**
 
 ```json
 GET infra-hosts/_search
@@ -144,5 +188,6 @@ GET infra-hosts/_search
 
 ---
 
-✅ Copie, cole e execute estas queries no Dev Tools do Kibana (ícone de terminal na barra lateral esquerda).
+✅ **Dica**: Cole qualquer uma dessas queries no **Dev Tools** do Kibana para executá-las diretamente.  
+Acompanhe os resultados e monte seus dashboards com base nesses dados!
 
