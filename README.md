@@ -85,19 +85,25 @@ Arquivos envolvidos:
 - `02-indexacao-basica/logstash.conf`
 - `01-instalacao/docker-compose.override.yml`
 
+No pipeline (`logstash.conf`):
+- Cada documento recebe um **_id determinístico** (`host@timestamp`) → ingestão é **idempotente**.  
+- É adicionado o campo `"ingest": "logstash"` → permite diferenciar docs do Logstash dos docs do Bulk.  
+
+Assim, se você rodar **Bulk + Logstash**, terá ~20.000 docs no índice (`10k Bulk + 10k Logstash`), mas sem duplicação.
+
 ---
 
 ### 🔎 4. Validar a ingestão
 
 #### Via cURL
 ```bash
-# Contagem total (esperado: 10000)
+# Contagem total (esperado: ~20000 se usou Bulk + Logstash)
 curl -s "http://localhost:9200/infra-hosts/_count?pretty"
 
-# Amostra (5 docs mais recentes)
-curl -s -X POST "http://localhost:9200/infra-hosts/_search?pretty" -H 'Content-Type: application/json' -d '{
-  "size": 5,
-  "sort": [{ "@timestamp": "desc" }]
+# Apenas documentos do Logstash
+curl -s -H 'Content-Type: application/json' -X POST "http://localhost:9200/infra-hosts/_search?pretty" -d '{
+  "size": 0,
+  "query": { "term": { "ingest": "logstash" } }
 }'
 ```
 
@@ -105,10 +111,11 @@ curl -s -X POST "http://localhost:9200/infra-hosts/_search?pretty" -H 'Content-T
 ```json
 GET infra-hosts/_count
 
+# Apenas docs do Logstash
 GET infra-hosts/_search
 {
-  "size": 5,
-  "sort": [{ "@timestamp": "desc" }]
+  "size": 0,
+  "query": { "term": { "ingest": "logstash" } }
 }
 ```
 
@@ -154,9 +161,11 @@ Responda:
 - **Erro `^M` em scripts no Windows:**  
   Use `dos2unix *.sh`
 - **Erro de rede `elastic` no Docker Compose:**  
-  Garanta que o bloco `networks:` esteja definido no `docker-compose.override.yml`.
+  Garanta que o bloco `networks:` esteja definido no `docker-compose.override.yml` ou use a rede default.
 - **Bulk `400 error`:**  
   Confirme que está postando em `/$INDEX/_bulk` e não em `/_bulk`.
+- **Docs não duplicaram (ainda 10k e não 20k):**  
+  Confirme que o arquivo `dados-10000-ago-2025-logstash.ndjson` tem 10k linhas (`wc -l`), que o Logstash subiu sem erro, e que o campo `ingest` está sendo gravado.
 
 ---
 
