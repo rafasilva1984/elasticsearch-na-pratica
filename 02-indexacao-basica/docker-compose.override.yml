@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.13.4
+    container_name: logstash
+    depends_on:
+      - elasticsearch
+    environment:
+      LS_JAVA_OPTS: "-Xms512m -Xmx512m"
+      ES_HOST: "http://elasticsearch:9200"
+      INDEX: "infra-hosts"
+      DATA_FILE: "/data/dados-10000-ago-2025.ndjson"
+    volumes:
+      - ./02-benchmark-indexacao/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+      - ./02-benchmark-indexacao/dados-10000-ago-2025.ndjson:/data/dados-10000-ago-2025.ndjson:ro
+    command: ["/usr/local/bin/docker-entrypoint", "logstash", "-f", "/usr/share/logstash/pipeline/logstash.conf"]
+    networks:
+      - elastic
