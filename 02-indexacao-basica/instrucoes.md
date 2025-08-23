@@ -127,4 +127,36 @@ GET infra-hosts/_search
 
 ---
 
-Pronto! Agora você tem a ingestão por **Bulk** (rápida) e por **Logstash** (flexível e idempotente), ambas apontando para datasets distintos — perfeito para demonstrar dois fluxos comuns de indexação no dia a dia.
+## 🛠️ Boas práticas e dicas extras
+
+- **Validação do dataset**  
+  Antes de ingerir, confira se o arquivo tem de fato 10.000 linhas:  
+  ```bash
+  wc -l dados-10000-ago-2025.ndjson
+  ```
+
+- **Evite duplicação de documentos**  
+  Se não definir `_id`, o Elasticsearch gera automaticamente um UUID.  
+  → No Bulk isso pode duplicar docs caso rode 2x o mesmo arquivo.  
+  → No Logstash o `_id` foi configurado como `host@timestamp` → garante idempotência.
+
+- **Controle de performance**  
+  Durante ingestão em massa, é comum desligar o `refresh_interval` e usar `number_of_replicas=0`.  
+  Isso já está implementado nos scripts.  
+  Depois da ingestão, o `refresh` volta ao normal para as buscas funcionarem.
+
+- **Debug de erros comuns**  
+  - `400 Bad Request` → formato NDJSON errado (verifique que cada doc ocupa uma linha).  
+  - `mapper_parsing_exception` → campo com tipo incorreto (ex.: string em campo integer).  
+  - Dica: rode o bulk com `--verbose` ou verifique o log do Logstash para ver quais docs falharam.
+
+- **Primeira visualização no Kibana**  
+  Após a ingestão, vá em **Kibana → Discover** e selecione o data view `infra-hosts`.  
+  Teste filtros rápidos:  
+  - `status:warning`  
+  - `cpu > 90`  
+  - `memoria > 85`
+
+---
+
+Pronto! Agora você tem a ingestão por **Bulk** (rápida) e por **Logstash** (flexível e idempotente), ambas apontando para datasets distintos — perfeito para demonstrar dois fluxos comuns de indexação no dia a dia, com boas práticas aplicadas.
