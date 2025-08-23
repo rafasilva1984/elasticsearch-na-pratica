@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Ingestão rápida via Bulk API para 10k docs
-# Requer: bash, curl, awk (ou gawk)
-# Dica Windows: se der erro com ^M -> dos2unix ingestar-bulk.sh
+# Ingestão rápida via Bulk API para 10k docs (NDJSON -> Bulk)
+# Requer: bash, curl, awk
+# Windows: se aparecer ^M -> dos2unix ingestar-bulk.sh
 
 set -euo pipefail
 
@@ -12,12 +12,11 @@ FILE="${FILE:-dados-10000-ago-2025.ndjson}"
 echo "→ ES_URL=$ES_URL  INDEX=$INDEX  FILE=$FILE"
 [[ -f "$FILE" ]] || { echo "❌ Arquivo não encontrado: $FILE"; exit 1; }
 
-# (opcional) recriar índice do zero
-# comente a linha abaixo se não quiser apagar
-curl -fsS -X DELETE "$ES_URL/$INDEX" >/dev/null || true
+# Apaga o índice se existir (ignora erro 404)
+curl -sS -o /dev/null -X DELETE "$ES_URL/$INDEX" || true
 
 echo "→ Criando índice $INDEX (settings + mappings básicos)"
-curl -fsS -X PUT "$ES_URL/$INDEX" -H 'Content-Type: application/json' -d '{
+curl -sS -o /dev/null -X PUT "$ES_URL/$INDEX" -H 'Content-Type: application/json' -d '{
   "settings": {
     "number_of_shards": 1,
     "number_of_replicas": 0,
@@ -33,27 +32,36 @@ curl -fsS -X PUT "$ES_URL/$INDEX" -H 'Content-Type: application/json' -d '{
       "@timestamp":{ "type": "date" }
     }
   }
-}' >/dev/null
+}'
 
 echo "→ Desligando refresh durante o bulk"
-curl -fsS -X PUT "$ES_URL/$INDEX/_settings" -H 'Content-Type: application/json' \
-  -d '{"index":{"refresh_interval":"-1"}}' >/dev/null
+curl -sS -o /dev/null -X PUT "$ES_URL/$INDEX/_settings" -H 'Content-Type: application/json' \
+  -d '{"index":{"refresh_interval":"-1"}}'
 
 echo "→ Ingerindo em BULK (convertendo NDJSON normal → formato Bulk em stream)"
 start=$(date +%s)
 
-# O arquivo tem 1 JSON por linha. Para Bulk, intercalamos linhas de ação {"index":{}}
-# awk imprime a linha de ação e em seguida a linha original do arquivo.
+# Envie o bulk para /{INDEX}/_bulk (assim não precisamos de _index na action)
+# Também capturamos a resposta para checar se houve errors:true
 awk '{print "{\"index\":{}}"; print $0}' "$FILE" \
-| curl -fsS -H 'Content-Type: application/x-ndjson' -X POST "$ES_URL/_bulk" --data-binary @- >/dev/null
+| curl -sS -H 'Content-Type: application/x-ndjson' -X POST "$ES_URL/$INDEX/_bulk" --data-binary @- \
+  -o .bulk-result.json
 
 # Reativa refresh e força refresh final
-curl -fsS -X PUT "$ES_URL/$INDEX/_settings" -H 'Content-Type: application/json' \
-  -d '{"index":{"refresh_interval":"1s"}}' >/dev/null
-curl -fsS -X POST "$ES_URL/$INDEX/_refresh" >/dev/null
+curl -sS -o /dev/null -X PUT "$ES_URL/$INDEX/_settings" -H 'Content-Type: application/json' \
+  -d '{"index":{"refresh_interval":"1s"}}'
+curl -sS -o /dev/null -X POST "$ES_URL/$INDEX/_refresh"
 
-end=$(date +%s)
-secs=$((end - start))
+end=$(date +%s); secs=$((end - start))
 
-count=$(curl -fsS "$ES_URL/$INDEX/_count" | grep -o '"count":[0-9]*' | cut -d: -f2)
+# Verifica errors no resultado do bulk
+if grep -q '"errors":true' .bulk-result.json; then
+  echo "⚠️  Bulk retornou errors=true. Amostra dos erros:"
+  # Mostra as 10 primeiras linhas com status >= 300
+  grep -n '"status":' .bulk-result.json | grep -E '3[0-9]{2}|4[0-9]{2}|5[0-9]{2}' | head -n 10 || true
+else
+  echo "✅ Bulk sem erros (errors=false)"
+fi
+
+count=$(curl -sS "$ES_URL/$INDEX/_count" | grep -o '"count":[0-9]*' | cut -d: -f2)
 echo "✅ Ingestão concluída em ${secs}s — documentos no índice: $count"
