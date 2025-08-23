@@ -36,9 +36,13 @@ Se preferir transformar/validar na entrada, use o Logstash com **arquivo dedicad
 Suba o Logstash junto do stack:
 
 ```bash
-docker-compose up -d logstash
+docker compose up -d logstash
 docker logs -f logstash   # acompanhe a ingestão (pontos no log)
 ```
+
+No pipeline:
+- Cada documento recebe um **_id determinístico** (`host@timestamp`) → a ingestão é idempotente.  
+- É adicionado o campo `"ingest": "logstash"` → permitindo diferenciar dados do Logstash dos dados do Bulk.  
 
 > Por padrão, o pipeline indexa no índice `infra-hosts`.  
 > Para rodar sem Logstash, suba apenas `elasticsearch` e `kibana`.
@@ -49,7 +53,7 @@ docker logs -f logstash   # acompanhe a ingestão (pontos no log)
 
 ### Usando cURL:
 ```bash
-# Contagem total (esperado: 10000)
+# Contagem total (esperado: 10000 se usou só um método; ~20000 se usou Bulk + Logstash)
 curl -s "http://localhost:9200/infra-hosts/_count?pretty"
 
 # Amostra (5 docs), ordenados por tempo desc
@@ -65,6 +69,12 @@ curl -s -H 'Content-Type: application/json' -X POST "http://localhost:9200/infra
   "query": {
     "range": { "@timestamp": { "gte": "2025-08-01", "lte": "2025-08-31T23:59:59" } }
   }
+}'
+
+# Apenas documentos do Logstash
+curl -s -H 'Content-Type: application/json' -X POST "http://localhost:9200/infra-hosts/_search?pretty" -d '{
+  "size": 0,
+  "query": { "term": { "ingest": "logstash" } }
 }'
 ```
 
@@ -86,6 +96,13 @@ GET infra-hosts/_search
     "range": { "@timestamp": { "gte": "2025-08-01", "lte": "2025-08-31T23:59:59" } }
   }
 }
+
+# Apenas documentos do Logstash
+GET infra-hosts/_search
+{
+  "size": 0,
+  "query": { "term": { "ingest": "logstash" } }
+}
 ```
 
 ---
@@ -97,15 +114,17 @@ GET infra-hosts/_search
 - `cpu`: uso de CPU (%)
 - `memoria`: uso de memória (%)
 - `@timestamp`: data/hora da coleta (agosto/2025)
+- `ingest`: origem da ingestão (`bulk` ou `logstash`)
 
 ---
 
 ## ✅ Checklist de validação
 1. O índice `infra-hosts` foi criado corretamente (`GET _cat/indices?v`).  
-2. Existem **10.000 documentos** no índice (`_count`).  
+2. Existem **10.000 documentos** no índice (se usou apenas um método) ou ~20.000 (se rodou Bulk + Logstash).  
 3. O filtro de data retorna apenas registros de **agosto/2025**.  
-4. (Se usar Logstash) os logs mostram progresso e finalização sem erros; a contagem bate com o esperado.
+4. O campo `ingest` permite diferenciar a origem dos documentos.  
+5. (Se usar Logstash) os logs mostram progresso e finalização sem erros; a contagem bate com o esperado.
 
 ---
 
-Pronto! Agora você tem a ingestão por **Bulk** (rápida) e por **Logstash** (flexível), ambas apontando para datasets distintos — perfeito para demonstrar dois fluxos comuns de indexação no dia a dia.
+Pronto! Agora você tem a ingestão por **Bulk** (rápida) e por **Logstash** (flexível e idempotente), ambas apontando para datasets distintos — perfeito para demonstrar dois fluxos comuns de indexação no dia a dia.
