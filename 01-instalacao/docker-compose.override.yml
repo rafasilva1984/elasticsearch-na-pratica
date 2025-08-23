@@ -6,18 +6,10 @@ services:
       - elasticsearch
     environment:
       LS_JAVA_OPTS: "-Xms512m -Xmx512m"
-      ES_HOST: "http://elasticsearch:9200"
+      ES_HOST: "http://elasticsearch:9200"   # usa o nome do serviço ES
       INDEX: "infra-hosts"
       DATA_FILE: "/data/dados-10000-ago-2025-logstash.ndjson"
     volumes:
-      # ⚠️ Este override deve ficar dentro de 01-instalacao/
-      # Por isso usamos caminhos relativos com .. para chegar em 02-indexacao-basica/
       - ../02-indexacao-basica/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
       - ../02-indexacao-basica/dados-10000-ago-2025-logstash.ndjson:/data/dados-10000-ago-2025-logstash.ndjson:ro
     command: ["/usr/local/bin/docker-entrypoint", "logstash", "-f", "/usr/share/logstash/pipeline/logstash.conf"]
-    networks:
-      - elastic
-
-networks:
-  elastic:
-    driver: bridge
