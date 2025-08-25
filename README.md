@@ -19,14 +19,14 @@ Simular o monitoramento de servidores de uma empresa, com dados como:
 
 ## 🧱 Estrutura do Projeto
 
-| Pasta                      | Conteúdo                                                                 |
-|---------------------------|--------------------------------------------------------------------------|
-| `01-instalacao/`          | Subida do Elasticsearch e Kibana com Docker                             |
-| `02-indexacao-basica/`    | Criação do índice `infra-hosts` e ingestão de **10.000 documentos**      |
-| `03-buscas-simples/`      | Consultas básicas com `match`, `range` e `bool`                         |
-| `04-filtros-e-analise/`   | Filtros booleanos e análises textuais                                   |
-| `05-visualizacao-kibana/` | Criação de dashboards no Kibana                                          |
-| `docs/`                   | Guia rápido e desafio prático final                                     |
+| Pasta                                                                                   | Conteúdo                                                                 |
+|-----------------------------------------------------------------------------------------|--------------------------------------------------------------------------|
+| [`01-instalacao/`](./01-instalacao)                                                     | Subida do Elasticsearch e Kibana com Docker                             |
+| [`02-indexacao-basica/`](./02-indexacao-basica)                                         | Criação do índice `infra-hosts` e ingestão de **10.000 documentos**      |
+| [`03-buscas-simples/`](./03-buscas-simples)                                             | Consultas básicas com `match`, `range` e `bool`                         |
+| [`04-filtros-e-analise/`](./04-filtros-e-analise)                                       | Filtros booleanos e análises textuais                                   |
+| [`05-visualizacao-kibana/`](./05-visualizacao-kibana)                                   | Criação de dashboards no Kibana                                          |
+| [`docs/`](./docs)                                                                       | Guia rápido e desafio prático final                                     |
 
 ---
 
@@ -81,11 +81,11 @@ docker logs -f logstash
 ```
 
 Arquivos envolvidos:
-- `02-indexacao-basica/dados-10000-ago-2025-logstash.ndjson`
-- `02-indexacao-basica/logstash.conf`
-- `01-instalacao/docker-compose.override.yml`
+- [`dados-10000-ago-2025-logstash.ndjson`](./02-indexacao-basica/dados-10000-ago-2025-logstash.ndjson)
+- [`logstash.conf`](./02-indexacao-basica/logstash.conf)
+- [`docker-compose.override.yml`](./01-instalacao/docker-compose.override.yml)
 
-No pipeline (`logstash.conf`):
+No pipeline:
 - Cada documento recebe um **_id determinístico** (`host@timestamp`) → ingestão é **idempotente**.  
 - É adicionado o campo `"ingest": "logstash"` → permite diferenciar docs do Logstash dos docs do Bulk.  
 
@@ -122,29 +122,27 @@ GET infra-hosts/_search
 ---
 
 ### 🔎 5. Realizar buscas simples e avançadas
-A partir da **Aula 03**, explore queries com `match`, `range` e `bool`:
+A partir da **[Aula 03](./03-buscas-simples)**, explore queries com `match`, `range` e `bool`:
 
 ```bash
-curl -X POST "http://localhost:9200/infra-hosts/_search"   -H 'Content-Type: application/json' -d @03-buscas-simples/query-match.json
+curl -X POST "http://localhost:9200/infra-hosts/_search"   -H 'Content-Type: application/json'   -d @03-buscas-simples/query-match.json
 ```
-
-Mais exemplos em `03-buscas-simples/`.
 
 ---
 
 ### 🧠 6. Trabalhar com filtros e análise de texto
-Exemplos em `04-filtros-e-analise/`.
+Veja exemplos em [`04-filtros-e-analise/`](./04-filtros-e-analise).
 
 ---
 
 ### 📊 7. Criar dashboards no Kibana
-Exemplos em `05-visualizacao-kibana/`.
+Veja exemplos em [`05-visualizacao-kibana/`](./05-visualizacao-kibana).
 
 ---
 
 ## 🧠 Desafio Final
 
-📁 `docs/desafio-pratico.md`
+📁 [`docs/desafio-pratico.md`](./docs/desafio-pratico.md)
 
 Responda:
 - Quais serviços têm mais hosts em `warning`?
@@ -175,7 +173,7 @@ Conecte-se comigo:
 
 - GitHub: [rafasilva1984](https://github.com/rafasilva1984)
 - LinkedIn: [rafael-silva-leader-coordenador](https://linkedin.com/in/rafael-silva-leader-coordenador)
-- Medium: [rafaelldasilva1984](https://medium.com/@rafaelldasilva1984)
+- Medium: [@rafaelldasilva1984](https://medium.com/@rafaelldasilva1984)
 - YouTube: [Observabilidade na Prática](https://www.youtube.com/@ObservabilidadenaPrática)
 
 ---
