@@ -2,7 +2,7 @@
 
 Este repositório é um guia prático para quem deseja aprender **Elasticsearch** simulando um cenário real de monitoramento de infraestrutura de TI.  
 
-A proposta é simples: aprender na prática como usar Elasticsearch e Kibana com **dados realistas**, tudo com scripts prontos, pipelines e explicações claras.
+A proposta é simples: aprender na prática como usar Elasticsearch e Kibana com **dados realistas**, tudo com scripts prontos, pipelines e explicações claras.  
 
 ---
 
@@ -14,6 +14,26 @@ Simular o monitoramento de servidores de uma empresa, com dados como:
 - Status do sistema (`online`, `warning`, `offline`)
 - Uso de CPU e memória (%)
 - Timestamps realistas distribuídos em **agosto/2025**
+
+---
+
+## 📦 Pré-requisitos
+
+Antes de começar, garanta que possui instalado em sua máquina:
+
+- **Git** → usado para clonar o repositório.
+  ```bash
+  git --version
+  ```
+- **Docker + Docker Compose** → usados para subir Elasticsearch, Kibana e Logstash.
+  ```bash
+  docker --version
+  docker compose version
+  ```
+- **Requisitos mínimos de hardware** → 2 CPUs, 4 GB de RAM e ~5 GB de disco livre.
+
+💡 No **Windows**, use **Docker Desktop com WSL2**.  
+💡 No **Linux**, instale o **Docker Engine** e habilite o serviço.
 
 ---
 
@@ -71,6 +91,11 @@ Esse script:
 - Ingere **10.000 documentos**
 - Reativa `refresh` ao final
 
+📖 **Entendendo os formatos**  
+- **NDJSON**: cada documento em uma linha JSON.  
+- **Bulk API**: cada documento do NDJSON vira 2 linhas (ação + conteúdo).  
+Isso acelera a ingestão e é usado em [`ingestar-bulk.sh`](./02-indexacao-basica/ingestar-bulk.sh).
+
 #### 🔹 B) Via Logstash (mais flexível)
 Se quiser transformar/validar os dados na entrada, use Logstash:
 
@@ -105,6 +130,12 @@ curl -s -H 'Content-Type: application/json' -X POST "http://localhost:9200/infra
   "size": 0,
   "query": { "term": { "ingest": "logstash" } }
 }'
+
+# Resumo dos índices
+curl -s "http://localhost:9200/_cat/indices?v"
+
+# Métricas detalhadas do índice
+curl -s "http://localhost:9200/infra-hosts/_stats?pretty" | head -n 120
 ```
 
 #### Via Kibana (Dev Tools)
@@ -117,12 +148,21 @@ GET infra-hosts/_search
   "size": 0,
   "query": { "term": { "ingest": "logstash" } }
 }
+
+# Resumo dos índices
+GET _cat/indices?v
+
+# Métricas detalhadas
+GET infra-hosts/_stats
 ```
 
 ---
 
 ### 🔎 5. Realizar buscas simples e avançadas
 A partir da **[Aula 03](./03-buscas-simples)**, explore queries com `match`, `range` e `bool`:
+
+- [`query-match.json`](./03-buscas-simples/query-match.json)  
+- [`query-range.json`](./03-buscas-simples/query-range.json)  
 
 ```bash
 curl -X POST "http://localhost:9200/infra-hosts/_search"   -H 'Content-Type: application/json'   -d @03-buscas-simples/query-match.json
@@ -178,4 +218,5 @@ Conecte-se comigo:
 
 ---
 
-**Projeto criado por Rafael Silva – Elasticsearch e Observabilidade na Prática.**
+**Projeto criado por Rafael Silva – Elasticsearch e Observabilidade na Prática.**  
+**Conectou, buscou e achou 🚀**
