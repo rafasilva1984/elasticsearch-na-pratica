@@ -1,7 +1,8 @@
 # 📊 Aula 05 – Visualização no Kibana
 
 Nesta etapa vamos transformar os dados de infraestrutura em **dashboards visuais** dentro do Kibana.  
-A ideia é sair da “lista de documentos” e enxergar padrões, gargalos e insights de forma visual.
+A ideia é sair da “lista de documentos” e passar a enxergar padrões, gargalos e insights de forma clara, rápida e visual.  
+Dashboards contam uma história: mostram saúde geral, gargalos por serviço, quem são os críticos e como tudo evolui no tempo.
 
 ---
 
@@ -24,18 +25,18 @@ Abra [http://localhost:5601](http://localhost:5601) no navegador.
 #### 🥧 Pizza: quantidade de hosts por status
 - Vá em **Visualize Library → Create visualization → Lens**.  
 - Arraste `status` para *Slices*.  
-- Ajuste as cores:  
-  - Verde → `online`  
-  - Amarelo → `warning`  
-  - Vermelho → `offline`  
-- Renomeie o título para **Distribuição de Hosts por Status**.
+- Ajuste as cores: verde → online, amarelo → warning, vermelho → offline.  
+- Renomeie o título para **Distribuição de Hosts por Status**.  
+
+💡 Insight: ótimo para uma visão geral rápida da saúde dos hosts.
 
 #### 📊 Barras: uso médio de CPU por serviço
 - Escolha **Bar Vertical**.  
 - Arraste `servico` para eixo X.  
 - Arraste `cpu` e selecione *Average*.  
 - Renomeie o título para **CPU Médio por Serviço**.  
-- Esse gráfico mostra quais serviços consomem mais CPU.
+
+💡 Insight: ajuda a identificar gargalos de consumo de CPU por serviço (ex: database vs webserver).
 
 #### 📋 Tabela: top 10 hosts com maior uso de memória
 - Escolha **Tabela**.  
@@ -43,14 +44,16 @@ Abra [http://localhost:5601](http://localhost:5601) no navegador.
 - Ordene por `memoria` desc.  
 - Limite para **Top 10**.  
 - Renomeie o título para **Top 10 Hosts – Memória**.  
-- Útil para identificar máquinas mais críticas.
+
+💡 Insight: ranking prático para identificar máquinas críticas.
 
 #### 📈 Linha do tempo: @timestamp vs uso de CPU
 - Escolha **Linha do tempo (Line)**.  
 - Eixo X → `@timestamp` (usar agregação por minuto ou hora).  
 - Eixo Y → `cpu` (média).  
 - Renomeie o título para **Uso de CPU ao Longo do Tempo**.  
-- Esse gráfico revela **picos e tendências**, ótimo para correlação com incidentes.
+
+💡 Insight: revela picos e tendências, útil para correlação com incidentes.
 
 ---
 
@@ -64,11 +67,11 @@ Abra [http://localhost:5601](http://localhost:5601) no navegador.
 
 ## 💡 Dicas Extras (Up Bonus)
 
-- **Filtros globais:** adicione um filtro `status: warning` ou `status: offline` para focar em críticos.  
-- **Intervalo de tempo:** configure o *Time Filter* para **Agosto/2025**.  
-- **Legibilidade:** converta CPU e memória para porcentagem (%) com 2 casas decimais.  
-- **Exportar:** baixe o dashboard em **PDF** ou **PNG** para compartilhar com o time.  
-- **Reutilização:** esses dashboards podem servir como base para monitoramento de um SOC ou NOC.  
+- **Filtros globais:** foque apenas em críticos (`status: warning` ou `offline`).  
+- **Intervalo de tempo:** configure o *Time Filter* para Agosto/2025.  
+- **Legibilidade:** CPU e memória como porcentagem (%) com 2 casas decimais.  
+- **Exportar:** gere PDF/PNG para relatórios executivos.  
+- **Reutilização:** dashboards podem ser base para SOCs, NOCs ou relatórios de negócio.
 
 ---
 
@@ -80,8 +83,7 @@ Com esses gráficos, conseguimos sair da visão bruta de documentos e enxergar:
 - **Hosts críticos** (memória)  
 - **Tendências no tempo** (linha do tempo de CPU)  
 
-👉 Agora seu ambiente já tem um **painel de observabilidade inicial**.  
-Na próxima etapa, vamos evoluir com desafios práticos e cenários avançados.
+👉 Agora você tem um **painel inicial de observabilidade** que pode ser evoluído.  
+Na próxima etapa, vamos avançar com desafios práticos e cenários mais complexos.
 
-Conectou, buscou e achou 🚀
-
+**Conectou, buscou e achou 🚀**
